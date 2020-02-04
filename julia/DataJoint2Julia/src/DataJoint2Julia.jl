@@ -4,15 +4,20 @@ using PyCall
 import Dates
 
 export dj, d2j, julia_getpass, julia_input
-export d2jDecorate, decorateMethod
+export d2jDecorate, decorateMethod, pyLocals
+export otherGuys
 
 const dj             = PyNULL()
 const origERD        = PyNULL()
+const orig_spawn_missing_classes        = PyNULL()
 
-decorateMethod       = PyNULL()
+decorateMethod             = PyNULL()
+d2j_spawn_missing_classes  = PyNULL()
 include("d2j.jl")
 
-
+function pyLocals()
+    return py"locals()"
+end
 
 """
 function d2jDecorate(dj_class_ex, schema)
@@ -122,6 +127,89 @@ def __decorateMethod(origMethod, *, newMethod=None, preMethod=None, postMethod=N
 
 end
 
+function otherGuys()
+
+py"""
+def __d2j_spawn_missing_classes(self, *, ___context=None):
+    '''
+    doc for Schema.spawn_missing_classes() should go here
+
+    Needs to be evaluated within the module to have access to
+    all the Python vars in the modules namespace
+    '''
+    # We're going to be asking which local variables are
+    # new; and we don't want to get confused with the variables
+    # used inside this function (e.g. if a table has the same
+    # name as one of these vars, that would be a problem). So
+    # we use local variable names preceded by three underscores,
+    # which is not part of the datajoint table naming conventions.
+    ___oldlocal_keys = set(locals())
+    if ___context==None:
+        $orig_spawn_missing_classes(self, context=locals())
+    else:
+        $orig_spawn_missing_classes(self, context=___context)
+
+    # After reading the resulting locals(), we're done, we
+    # can create new variables after that without worrying about
+    # name clashes
+    newlocals = locals()
+    newlocal_keys = set(newlocals)
+
+    newkeys = set(newlocal_keys) - set(___oldlocal_keys)
+    newkeys = newkeys - {'___context', '___oldlocal_keys'}
+
+    difflocals = { k : newlocals[k] for k in newkeys }
+    d2jc, expr = $d2jLocals(difflocals)
+    return d2jc, expr
+
+"""
+
+end
+
+function d2jLocals(locals::Dict)
+    d2jclasses = Dict()
+    expr    = ""
+    for k in keys(locals)
+        if typeof(k) <: String && typeof(locals[k]) <: PyObject &&
+            locals[k].__class__.__name__ == "OrderedClass"
+            d2jclasses[k] = locals[k]
+            expr = expr * "$k = d2jclasses[\"$k\"]; "
+        end
+    end
+
+    return d2jclasses, Meta.parse(expr)
+end
+
+
+# py"""
+# def __replaceMethod(origMethod, newMethod):
+#    '''decorateMethod(origMethod, newMethod):
+#
+#    Python function:
+#    Replaces a class method.
+#
+#    :param     origMethod     The original class method to be decorated
+#    :para      newMethod      Should be a function that can
+#                              take self, followed by whatever arguments origMethod
+#                              takes.  The final output of the replaced method
+#                              will be the output of newMethod
+#
+#    :return                   the new Method
+#
+#    EXAMPLE CALL (within Python environment):
+#
+#       Example.method = __replaceMethod(Example.method_,  \
+#       lambda self, *args, **kwargs: print("I'm repleced! self = ", self))
+#
+#    '''
+#    def replacing(self, *args, **kwargs):
+#        return newMethod(self, *args, **kwargs)
+#
+#    return replacing
+#
+# """
+
+
 
 
 
@@ -214,8 +302,9 @@ end
 
 
 
-
 function __init__()
+    pushfirst!(PyVector(pyimport("sys")."path"), "/Users/carlos/Github/datajoint/datajoint-python")
+
     # In Julia Jupyter notebooks, the Julia stdin and stdout are not
     # the same as the Python stdin stdout. So here we replace Python's
     # print, input, and getpass functions (which interact with stdin and
@@ -248,7 +337,12 @@ function __init__()
     # Evaluate ERD in Python namespace local to this module:
     dj.ERD = myERD
 
-
+    # And evaluate spawn_missing_classes also in Python namespace local to this module
+    copy!(orig_spawn_missing_classes, dj.schema.spawn_missing_classes)
+    otherGuys()
+    dj.schema.spawn_missing_classes = py"__d2j_spawn_missing_classes"
+    #dj.schema.spawn_missing_classes = decorateMethod(dj.schema.spawn_missing_classes,
+    #    newMethod = d2j_spawn_missing_classes);
 
     # Have jfetch() be the same as fetch() but wrapped with d2j()
     # We don't decorate the Fetch object's __call__ function directly
