@@ -341,7 +341,10 @@ function __init__()
     copy!(origERD, dj.ERD)
 
     # Evaluate ERD in Python namespace local to this module:
-    dj.ERD = myERD
+    dj.ERD     = myERD
+    # and add its aliases:
+    dj.Di      = myERD
+    dj.Diagram = myERD
 
     # And evaluate spawn_missing_classes also in Python namespace local to this module
     copy!(orig_spawn_missing_classes, dj.schema.spawn_missing_classes)
