@@ -57,7 +57,12 @@ end
 Neuron = d2jDecorate(Neuron, schema)
 ```
 
+# Differences between use of datajoint in Python vs. Julia
 
+* Use `@pydef` (as in the examples above) to declare new tables; use `d2jDecorate(MyTable, mySchema)` after declaring a table instead of preceding the declaration with `@mySchema`.
+* Use `jfetch()` instead of `fetch()`
+* Remember that in Julia, single quotes are for characters ('c'), not strings of more than one character
+* Instead of `schema.spawn_missing_classes()`, use `d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)`
 
 # Known Issues
 
