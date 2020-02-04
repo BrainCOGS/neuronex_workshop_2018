@@ -64,7 +64,7 @@ Neuron = d2jDecorate(Neuron, schema)
 * Remember that in Julia, single quotes are for characters (`'c'`), not strings of more than one character. Hence `Mouse() & "dob = '2017-05-15'"` instead of `Mouse() & 'dob = "2017-05-15"``
 * Instead of 
     
-    schema.spawn_missing_classes()
+    `schema.spawn_missing_classes()`
     
  use 
  
