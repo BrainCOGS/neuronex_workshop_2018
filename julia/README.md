@@ -61,8 +61,14 @@ Neuron = d2jDecorate(Neuron, schema)
 
 * Use `@pydef` (as in the examples above) to declare new tables; use `d2jDecorate(MyTable, mySchema)` after declaring a table instead of preceding the declaration with `@mySchema`.
 * Use `jfetch()` instead of `fetch()`
-* Remember that in Julia, single quotes are for characters ('c'), not strings of more than one character
-* Instead of `schema.spawn_missing_classes()`, use `d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)`
+* Remember that in Julia, single quotes are for characters (`'c'`), not strings of more than one character. Hence `Mouse() & "dob = '2017-05-15'"` instead of `Mouse() & 'dob = "2017-05-15"``
+* Instead of 
+    
+    schema.spawn_missing_classes()
+    
+ use 
+ 
+    d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)
 
 # Known Issues
 
