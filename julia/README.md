@@ -57,13 +57,28 @@ end
 Neuron = d2jDecorate(Neuron, schema)
 ```
 
+# Differences between use of datajoint in Python vs. Julia
 
+* Use `@pydef` (as in the examples above) to declare new tables; use `d2jDecorate(MyTable, mySchema)` after declaring a table instead of preceding the declaration with `@mySchema`.
+* Use `jfetch()` instead of `fetch()`
+* Remember that in Julia, single quotes are for characters (`'c'`), not strings of more than one character. Hence `Mouse() & "dob = '2017-05-15'"` instead of `Mouse() & 'dob = "2017-05-15"``
+* Instead of 
+    
+    `schema.spawn_missing_classes()`
+    
+ use 
+ 
+    d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)
 
 # Known Issues
 
-Very few. All major known issues currently resolved. 
+Not too many. All major known issues currently resolved. 
 
-* displaying the ERD works in Julia Jupyter notebooks, but does not work in Julia REPL at terminal or Atom. (Currently it's not working for me in Python from the terminal either.)
+* To get `dj.ERD()` to display in Julia REPL or Python REPL (it works out of the box in Jupyter notebooks), add `.draw()` to the call, as in `dj.ERD(schema).draw()` ~displaying the ERD works in Julia Jupyter notebooks, but does not work in Julia REPL at terminal or Atom. (Currently it's not working for me in Python from the terminal either.)~ . 
+* `schema.spawn_missing_classes()` doesn't quite work in Julia, needs fixing to address local context properly.
+* Should add the Python docstrings to the Julia functions `dj.ERD()` and `jfetch()` and `jfetch1()`. And if a new `spawn_missing_classes()` is made, to that one, too.
+* Add aliases for ERD, such as Diagram
+* Python's errors and warnings probably also need to be redirected in Julia Jupyter notebooks (like `print()` and `input()` were).
 
 ## Improvements TO-DO
 
