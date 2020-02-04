@@ -69,6 +69,7 @@ Neuron = d2jDecorate(Neuron, schema)
  use 
  
     d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)
+    # Note the variable name "d2jclasses" MUST be used here. Not elegant but works.
 
 # Known Issues
 
@@ -86,6 +87,15 @@ Not too many. All major known issues currently resolved.
 * `d2j()` is probably not optimized for efficiency (neither in time nor memory space). Unclear whether that matters, though, since most of the time in fetching data from a table probably goes into accessing the server, not the `d2j` reformatting.
      
 # Change Log
+
+### 2020-02-04 Fixed schema.spawn_missing_classes()
+
+* schema.spawn_missing_classes now works, but must be inelegantly called as follows:
+
+    `d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)`
+    `# Note the variable name "d2jclasses" MUST be used here. Not elegant but works.`
+* This was required for tutorial 3; now ready to translate tutorial 3. And tutorial 4 does not need any translation.
+
 
 ### 2020-01-23 Enormous code simplification, solving a whole host of issues.
 
