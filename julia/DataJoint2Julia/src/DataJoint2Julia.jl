@@ -4,8 +4,7 @@ using PyCall
 import Dates
 
 export dj, d2j, julia_getpass, julia_input
-export d2jDecorate, decorateMethod, pyLocals
-export otherGuys
+export d2jDecorate, decorateMethod
 
 const dj             = PyNULL()
 const origERD        = PyNULL()
@@ -15,9 +14,9 @@ decorateMethod             = PyNULL()
 d2j_spawn_missing_classes  = PyNULL()
 include("d2j.jl")
 
-function pyLocals()
-    return py"locals()"
-end
+# function pyLocals()
+#    return py"locals()"
+# end
 
 """
 function d2jDecorate(dj_class_ex, schema)
@@ -124,10 +123,9 @@ def __decorateMethod(origMethod, *, newMethod=None, preMethod=None, postMethod=N
    return decorated
 
 """
-
 end
 
-function otherGuys()
+function furtherPythonEnvironmentFunctions()
 
 py"""
 def __d2j_spawn_missing_classes(self, *, ___context=None):
@@ -166,6 +164,14 @@ def __d2j_spawn_missing_classes(self, *, ___context=None):
 
 end
 
+
+"""
+Given a dictionary of variable names and values, finds those for which the
+values have class name OrderedClass (like datajoint tables), and then
+returns a dictionary (assumed to be called d2jclasses) and an expression
+such that eval(expression) will instantiate all keys in d2jclasses as variables,
+with values given by their entries in the d2jclasses.
+"""
 function d2jLocals(locals::Dict)
     d2jclasses = Dict()
     expr    = ""
@@ -339,7 +345,7 @@ function __init__()
 
     # And evaluate spawn_missing_classes also in Python namespace local to this module
     copy!(orig_spawn_missing_classes, dj.schema.spawn_missing_classes)
-    otherGuys()
+    furtherPythonEnvironmentFunctions()
     dj.schema.spawn_missing_classes = py"__d2j_spawn_missing_classes"
     #dj.schema.spawn_missing_classes = decorateMethod(dj.schema.spawn_missing_classes,
     #    newMethod = d2j_spawn_missing_classes);
