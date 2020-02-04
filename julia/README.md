@@ -75,11 +75,9 @@ Neuron = d2jDecorate(Neuron, schema)
 
 Not too many. All major known issues currently resolved. 
 
-* To get `dj.ERD()` to display in Julia REPL or Python REPL (it works out of the box in Jupyter notebooks), add `.draw()` to the call, as in `dj.ERD(schema).draw()` ~displaying the ERD works in Julia Jupyter notebooks, but does not work in Julia REPL at terminal or Atom. (Currently it's not working for me in Python from the terminal either.)~ . 
-* `schema.spawn_missing_classes()` doesn't quite work in Julia, needs fixing to address local context properly.
-* Should add the Python docstrings to the Julia functions `dj.ERD()` and `jfetch()` and `jfetch1()`. And if a new `spawn_missing_classes()` is made, to that one, too.
-* Add aliases for ERD, such as Diagram
+* Should add the Python docstrings to the Julia functions `dj.ERD()` and `jfetch()` and `jfetch1()` and `spawn_missing_classes()`.
 * Python's errors and warnings probably also need to be redirected in Julia Jupyter notebooks (like `print()` and `input()` were).
+* To get `dj.ERD()` to display in Julia REPL or Python REPL (it works out of the box in Jupyter notebooks), add `.draw()` to the call, as in `dj.ERD(schema).draw()`. 
 
 ## Improvements TO-DO
 
@@ -90,11 +88,13 @@ Not too many. All major known issues currently resolved.
 
 ### 2020-02-04 Fixed schema.spawn_missing_classes()
 
-* schema.spawn_missing_classes now works, but must be inelegantly called as follows:
+* `schema.spawn_missing_classes()` now works, but must be inelegantly called as follows:
 
     `d2jclasses, expr = schema.spawn_missing_classes(); eval(expr)`
     `# Note the variable name "d2jclasses" MUST be used here. Not elegant but works.`
-* This was required for tutorial 3; now ready to translate tutorial 3. And tutorial 4 does not need any translation.
+    
+* `schema.spawn_missing_classes()` was required for tutorial 3; now ready to translate tutorial 3. And tutorial 4 does not need any translation.
+* Aliases `Di` and `Diagram` added for `ERD`
 
 
 ### 2020-01-23 Enormous code simplification, solving a whole host of issues.
